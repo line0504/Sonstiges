@@ -1,0 +1,97 @@
+import tkinter as tk
+
+# Model
+class Hund():
+    def __init__(self, name, farbe, rasse):
+        self.name = name
+        self.farbe = farbe
+        self.rasse = rasse 
+
+    def bellen(self, anzahl):
+        beller = ""
+        for i in range(anzahl):
+            beller = beller + "Wau "
+        ausgabe = f"{self.name} sagt {beller}"
+        return ausgabe
+
+    def anzeigen(self):
+        return self.name
+
+# Controller
+class HundController():
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
+
+    def on_select(self, event):
+        s = self.view.lbox.curselection()
+        if len(s) == 0:
+            return
+        index = int(s[0])
+        h = self.model.hunde[index]
+        menge = int(self.view.eingabefeld.get())
+        ausgabe = h.bellen(menge)
+        self.view.update_output(ausgabe)
+
+# View
+class HundView():
+    def __init__(self, root, model):
+        self.root = root
+        self.model = model
+
+        self.label1 = tk.Label(self.root, text="Hunde")
+        self.label1.pack()
+
+        self.lbox = tk.Listbox(self.root)
+        self.lbox["selectmode"] = "single"
+        self.lbox.pack()
+
+        self.eingabefeld = tk.Entry(self.root)
+        self.eingabefeld.pack()
+
+        self.schaltf1 = tk.Button(self.root, text="Anzahl")
+        self.schaltf1.pack()
+
+    def reload_list(self):
+        self.lbox.delete(0, "end")
+        for h in self.model.hunde:
+            self.lbox.insert("end", h.anzeigen())
+
+    def update_output(self, ausgabe):
+        label2 = tk.Label(self.root, text=ausgabe)
+        label2.pack()
+
+# Model für Hunde-Liste
+class HundModel():
+    def __init__(self, hunde):
+        self.hunde = hunde
+
+# Hauptprogramm
+class HundApp():
+    def __init__(self):
+        self.root = tk.Tk()
+        self.model = self.init_model()
+        self.view = self.init_view()
+        self.controller = self.init_controller()
+
+    def init_model(self):
+        bello = Hund("Bello", "braun", "Chihuahua")
+        fritzi = Hund("Fritzi", "weiß", "Beagle")
+        hunde = [bello, fritzi]
+        return HundModel(hunde)
+
+    def init_view(self):
+        return HundView(self.root, self.model)
+
+    def init_controller(self):
+        controller = HundController(self.model, self.view)
+        self.view.schaltf1.bind("<Button-1>", controller.on_select)
+        return controller
+
+    def run(self):
+        self.view.reload_list()
+        self.root.mainloop()
+
+# Hauptprogramm
+app = HundApp()
+app.run()
